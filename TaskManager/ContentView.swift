@@ -8,79 +8,114 @@
 import SwiftUI
 import CoreData
 
+enum Routes: Hashable {
+    case task
+    case addTasks
+    
+    case notes
+    case addNotes
+    
+    case categories
+    case addCategories
+    
+    case settings
+}
+
+@MainActor
+class Router: ObservableObject {
+    @Published var path: NavigationPath = .init()
+    
+    func appear(route: Routes) {
+        popToRoot()
+        path.append(route)
+    }
+    
+    func push(route: Routes) {
+        path.append(route)
+    }
+    
+    func pop() {
+        path.removeLast()
+    }
+    
+    func popToRoot() {
+        path = NavigationPath()
+    }
+    
+    @ViewBuilder
+    func view(_ route: Routes) -> some View {
+        Group {
+            switch route {
+            case .task:
+                ContentView()
+            case .addTasks:
+                ContentView()
+            case .notes:
+                ContentView()
+            case .addNotes:
+                ContentView()
+            case .categories:
+                ContentView()
+            case .addCategories:
+                ContentView()
+            case .settings:
+                ContentView()
+            }
+        }
+        .environmentObject(self)
+    }
+    
+}
+
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-
+    @EnvironmentObject var viewModel: TaskManagerViewModel
+    @EnvironmentObject var coordinator: Router
+    
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
-                    }
+        VStack {
+            HStack {
+                Button("+") {
+                    coordinator.push(route: .addCategories)
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                .font(.title)
+                .padding()
+                Spacer()
+                Text("Tasks")
+                Spacer()
+                Button("🔎") {
+                    viewModel.add(title: "test")
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                .padding()
+            }
+            .background(Color.secondary)
+            
+            Spacer()
+            if viewModel.items.isEmpty {
+                Text("No items")
+            } else {
+                List(viewModel.items, id: \.id) { item in
+                    Text("\(item.title)")
                 }
             }
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
+            
+            Spacer()
         }
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
 
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ContentView()
+        .environmentObject(TaskManagerViewModel(repo: CoreDataTaskRepository(container: CoreDataFactory().container)))
+        .environmentObject(Router())
+}
+
+struct Page: View {
+    
+    
+    var body: some View {
+        VStack {
+            
+        }
+    }
 }
