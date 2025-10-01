@@ -19,6 +19,7 @@ enum Routes: Hashable {
     case addCategories
     
     case settings
+    
 }
 
 @MainActor
