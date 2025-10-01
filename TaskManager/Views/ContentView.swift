@@ -15,7 +15,7 @@ struct ContentView: View {
         VStack() {
             HStack {
                 Button("+") {
-                    coordinator.presentSheet(.addTasks)
+                    coordinator.presentSheet(.addTasks(vm: viewModel))
                 }
                 .font(.title)
                 .padding()
@@ -34,7 +34,9 @@ struct ContentView: View {
                 Text("No items")
             } else {
                 List(viewModel.items, id: \.id) { item in
-                    TaskView(item: item)
+                    Section {
+                        TaskView(item: item)
+                    }
                 }
                 .ignoresSafeArea()
             }

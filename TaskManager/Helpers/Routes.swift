@@ -24,7 +24,7 @@ enum Routes: Hashable {
 enum ModalRoutes: Identifiable {
     var id: String { String(describing: self) }
     
-    case addTasks
+    case addTasks(vm: TaskManagerViewModel)
     case addNotes
     case addCategories
 }

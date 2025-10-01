@@ -11,13 +11,18 @@ struct TaskView: View {
     
     var body: some View {
         HStack {
-            VStack {
+            VStack(alignment: .leading) {
                 Text("\(item.title)")
+                    .fontWeight(.semibold)
                 Text("category")
             }
             Spacer()
-            Image(uiImage: .checkmark)
+            Image(uiImage: item.isDone ? .checkmark : .strokedCheckmark)
         }
         .padding()
     }
+}
+
+#Preview {
+    TaskView(item: TaskItem(title: "test"))
 }

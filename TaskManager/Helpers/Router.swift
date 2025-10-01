@@ -62,8 +62,8 @@ class Router: ObservableObject {
     @ViewBuilder
     func modalView(_ route: ModalRoutes) -> some View {
         switch route {
-        case .addTasks:
-            VStack { Text("Test")}.padding()
+        case .addTasks(let vm):
+            VStack { Text("Test \(vm.items.first?.title ?? "") ")}.padding()
         case .addNotes:
             VStack { Text("Test")}.padding()
         case .addCategories:
