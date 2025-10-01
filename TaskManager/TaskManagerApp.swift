@@ -15,9 +15,11 @@ struct TaskManagerApp: App {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
                 ContentView()
-                    .environmentObject(TaskManagerViewModel(repo: CoreDataTaskRepository(container: CoreDataFactory().container)))
                     .navigationDestination(for: Routes.self) { route in
                         coordinator.view(route)
+                    }
+                    .sheet(item: $coordinator.sheet) { modal in
+                        coordinator.modalView(modal)
                     }
             }
             .environmentObject(coordinator)

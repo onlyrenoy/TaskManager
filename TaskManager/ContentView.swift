@@ -22,9 +22,26 @@ enum Routes: Hashable {
     
 }
 
+enum ModalRoutes: Identifiable {
+    var id: String { String(describing: self) }
+    
+    case addTasks
+    case addNotes
+    case addCategories
+}
+
 @MainActor
 class Router: ObservableObject {
     @Published var path: NavigationPath = .init()
+    @Published var sheet: ModalRoutes? = nil
+    
+    func presentSheet(_ modal: ModalRoutes) {
+        sheet = modal
+    }
+    
+    func dismissSheet() {
+        sheet = nil
+    }
     
     func appear(route: Routes) {
         popToRoot()
@@ -66,17 +83,28 @@ class Router: ObservableObject {
         .environmentObject(self)
     }
     
+    @ViewBuilder
+    func modalView(_ route: ModalRoutes) -> some View {
+        switch route {
+        case .addTasks:
+            VStack { Text("Test")}.padding()
+        case .addNotes:
+            VStack { Text("Test")}.padding()
+        case .addCategories:
+            VStack { Text("Test")}.padding()
+        }
+    }
 }
 
 struct ContentView: View {
-    @EnvironmentObject var viewModel: TaskManagerViewModel
+    @StateObject var viewModel =  TaskManagerViewModel(repo: CoreDataTaskRepository(container: CoreDataFactory().container))
     @EnvironmentObject var coordinator: Router
     
     var body: some View {
-        VStack {
+        VStack() {
             HStack {
                 Button("+") {
-                    coordinator.push(route: .addCategories)
+                    coordinator.presentSheet(.addTasks)
                 }
                 .font(.title)
                 .padding()
@@ -95,8 +123,9 @@ struct ContentView: View {
                 Text("No items")
             } else {
                 List(viewModel.items, id: \.id) { item in
-                    Text("\(item.title)")
+                    TaskView(item: item)
                 }
+                .ignoresSafeArea()
             }
             
             Spacer()
@@ -107,16 +136,21 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(TaskManagerViewModel(repo: CoreDataTaskRepository(container: CoreDataFactory().container)))
         .environmentObject(Router())
 }
 
-struct Page: View {
-    
+struct TaskView: View {
+    @State var item: TaskItem
     
     var body: some View {
-        VStack {
-            
+        HStack {
+            VStack {
+                Text("\(item.title)")
+                Text("category")
+            }
+            Spacer()
+            Image(uiImage: .checkmark)
         }
+        .padding()
     }
 }
